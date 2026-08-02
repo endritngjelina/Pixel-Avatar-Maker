@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Avatar Maker Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            text-align: center;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .canvas-section {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .canvas-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .canvas-controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .grid-size-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .grid-size-control label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .grid-size-control select {
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .pixel-canvas {
+            display: grid;
+            gap: 1px;
+            background: #ddd;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 0 auto;
+            max-width: 100%;
+            aspect-ratio: 1;
+        }
+
+        .pixel {
+            background: #fff;
+            border: 1px solid #eee;
+            cursor: crosshair;
+            transition: all 0.1s ease;
+            position: relative;
+        }
+
+        .pixel:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .tools-section {
+            width: 320px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+        }
+
+        .tool-group {
+            margin-bottom: 2rem;
+        }
+
+        .tool-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tool-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .color-swatch.active {
+            border-color: #333;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .custom-color-section {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .color-input {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .brush-tools {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-btn {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .tool-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .tool-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .primary-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .secondary-btn {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e9ecef;
+        }
+
+        .secondary-btn:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .export-section {
+            border-top: 1px solid #e9ecef;
+            padding-top: 1.5rem;
+        }
+
+        .export-options {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .export-btn {
+            padding: 1rem;
+            border: 2px solid #28a745;
+            background: #28a745;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .size-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .size-btn {
+            padding: 0.5rem;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .size-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .undo-redo {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .undo-redo button {
+            flex: 1;
+            padding: 0.5rem;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .undo-redo button:hover:not(:disabled) {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .undo-redo button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .symmetry-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .preview-canvas {
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        .layers-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .layer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .layer:hover {
+            background: #e9ecef;
+        }
+
+        .layer.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .layer-visibility {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .tools-section {
+                width: 100%;
+            }
+            
+            .header {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        .animation-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .frame-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .frame-btn {
+            padding: 0.5rem;
+            border: 2px solid #e9ecef;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .frame-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .onion-skin {
+            opacity: 0.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Pixel Avatar Maker Pro</h1>
+        <p>Professional pixel art creation tool with advanced features</p>
+    </div>
+
+    <div class="container">
+        <div class="canvas-section">
+            <div class="canvas-header">
+                <h2 class="canvas-title">Canvas</h2>
+                <div class="canvas-controls">
+                    <div class="grid-size-control">
+                        <label for="gridSize">Grid Size:</label>
+                        <select id="gridSize">
+                            <option value="16">16x16</option>
+                            <option value="32" selected>32x32</option>
+                            <option value="64">64x64</option>
+                            <option value="128">128x128</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="pixelCanvas" class="pixel-canvas"></div>
+        </div>
+
+        <div class="tools-section">
+            <div class="tool-group">
+                <h3 class="tool-title">Color Palette</h3>
+                <div class="color-palette" id="colorPalette"></div>
+                <div class="custom-color-section">
+                    <input type="color" id="customColor" class="color-input" value="#667eea">
+                    <button class="tool-btn" onclick="addCustomColor()">Add Color</button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3 class="tool-title">Tools</h3>
+                <div class="brush-tools">
+                    <button class="tool-btn active" data-tool="brush">🖌️ Brush</button>
+                    <button class="tool-btn" data-tool="eraser">🧹 Eraser</button>
+                    <button class="tool-btn" data-tool="fill">🪣 Fill</button>
+                    <button class="tool-btn" data-tool="eyedropper">💧 Eyedropper</button>
+                </div>
+                <div class="symmetry-controls">
+                    <button class="tool-btn" id="symmetryH">↔️ H-Symmetry</button>
+                    <button class="tool-btn" id="symmetryV">↕️ V-Symmetry</button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3 class="tool-title">Actions</h3>
+                <div class="undo-redo">
+                    <button id="undoBtn" disabled>↶ Undo</button>
+                    <button id="redoBtn" disabled>↷ Redo</button>
+                </div>
+                <div class="action-buttons">
+                    <button class="action-btn secondary-btn" onclick="clearCanvas()">Clear</button>
+                    <button class="action-btn secondary-btn" onclick="randomize()">Random</button>
+                </div>
+            </div>
+
+            <div class="tool-group">
+                <h3 class="tool-title">Animation</h3>
+                <div class="frame-controls">
+                    <button class="frame-btn" onclick="addFrame()">+ Frame</button>
+                    <button class="frame-btn" onclick="deleteFrame()">- Frame</button>
+                    <button class="frame-btn" onclick="playAnimation()">▶️ Play</button>
+                    <button class="frame-btn" onclick="stopAnimation()">⏹️ Stop</button>
+                </div>
+                <div id="framesList" class="frames-list"></div>
+            </div>
+
+            <div class="tool-group">
+                <h3 class="tool-title">Preview</h3>
+                <div class="preview-section">
+                    <canvas id="previewCanvas" class="preview-canvas" width="64" height="64"></canvas>
+                </div>
+                <div class="size-options">
+                    <button class="size-btn" data-size="32">32px</button>
+                    <button class="size-btn active" data-size="64">64px</button>
+                    <button class="size-btn" data-size="128">128px</button>
+                </div>
+            </div>
+
+            <div class="tool-group export-section">
+                <h3 class="tool-title">Export</h3>
+                <div class="export-options">
+                    <button class="export-btn" onclick="exportPNG()">📥 Export PNG</button>
+                    <button class="export-btn" onclick="exportGIF()" id="exportGIF">📥 Export GIF</button>
+                    <button class="action-btn secondary-btn" onclick="saveProject()">💾 Save Project</button>
+                    <button class="action-btn secondary-btn" onclick="loadProject()">📁 Load Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" style="display: none;" accept=".json">
+
+    <script>
+        class PixelAvatarMaker {
+            constructor() {
+                this.gridSize = 32;
+                this.currentColor = '#667eea';
+                this.currentTool = 'brush';
+                this.isDrawing = false;
+                this.symmetryH = false;
+                this.symmetryV = false;
+                this.history = [];
+                this.historyIndex = -1;
+                this.maxHistory = 50;
+                this.previewSize = 64;
+                this.frames = [{}];
+                this.currentFrame = 0;
+                this.isAnimating = false;
+                this.animationInterval = null;
+                
+                this.defaultColors = [
+                    '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+                    '#800000', '#008000', '#000080', '#808000', '#800080', '#008080', '#808080', '#C0C0C0',
+                    '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe', '#43e97b', '#38f9d7',
+                    '#ffecd2', '#fcb69f', '#a8edea', '#fed6e3', '#ff9a9e', '#fecfef', '#ffeaa7', '#fab1a0'
+                ];
+                
+                this.init();
+            }
+
+            init() {
+                this.createColorPalette();
+                this.createCanvas();
+                this.bindEvents();
+                this.updatePreview();
+                this.saveState();
+                this.updateFramesList();
+            }
+
+            createColorPalette() {
+                const palette = document.getElementById('colorPalette');
+                palette.innerHTML = '';
+                
+                this.defaultColors.forEach((color, index) => {
+                    const swatch = document.createElement('div');
+                    swatch.className = 'color-swatch';
+                    swatch.style.backgroundColor = color;
+                    swatch.onclick = () => this.selectColor(color, swatch);
+                    if (index === 0) swatch.classList.add('active');
+                    palette.appendChild(swatch);
+                });
+            }
+
+            createCanvas() {
+                const canvas = document.getElementById('pixelCanvas');
+                canvas.innerHTML = '';
+                canvas.style.gridTemplateColumns = `repeat(${this.gridSize}, 1fr)`;
+                canvas.style.width = '400px';
+                canvas.style.height = '400px';
+
+                for (let i = 0; i < this.gridSize * this.gridSize; i++) {
+                    const pixel = document.createElement('div');
+                    pixel.className = 'pixel';
+                    pixel.dataset.index = i;
+                    pixel.onmousedown = (e) => this.startDrawing(e, i);
+                    pixel.onmouseenter = (e) => this.continueDraw(e, i);
+                    pixel.onmouseup = () => this.stopDrawing();
+                    canvas.appendChild(pixel);
+                }
+            }
+
+            bindEvents() {
+                document.getElementById('gridSize').onchange = (e) => {
+                    this.gridSize = parseInt(e.target.value);
+                    this.createCanvas();
+                    this.updatePreview();
+                };
+
+                document.querySelectorAll('[data-tool]').forEach(btn => {
+                    btn.onclick = () => this.selectTool(btn.dataset.tool, btn);
+                });
+
+                document.getElementById('symmetryH').onclick = (e) => {
+                    this.symmetryH = !this.symmetryH;
+                    e.target.classList.toggle('active');
+                };
+
+                document.getElementById('symmetryV').onclick = (e) => {
+                    this.symmetryV = !this.symmetryV;
+                    e.target.classList.toggle('active');
+                };
+
+                document.getElementById('undoBtn').onclick = () => this.undo();
+                document.getElementById('redoBtn').onclick = () => this.redo();
+
+                document.querySelectorAll('[data-size]').forEach(btn => {
+                    btn.onclick = () => this.selectPreviewSize(parseInt(btn.dataset.size), btn);
+                });
+
+                document.onmouseup = () => this.stopDrawing();
+                document.onmouseleave = () => this.stopDrawing();
+            }
+
+            selectColor(color, swatch) {
+                this.currentColor = color;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+            }
+
+            selectTool(tool, btn) {
+                this.currentTool = tool;
+                document.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+
+            selectPreviewSize(size, btn) {
+                this.previewSize = size;
+                document.querySelectorAll('[data-size]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.updatePreview();
+            }
+
+            startDrawing(e, index) {
+                this.isDrawing = true;
+                this.drawPixel(index);
+                e.preventDefault();
+            }
+
+            continueDraw(e, index) {
+                if (this.isDrawing) {
+                    this.drawPixel(index);
+                }
+            }
+
+            stopDrawing() {
+                if (this.isDrawing) {
+                    this.isDrawing = false;
+                    this.saveState();
+                    this.updatePreview();
+                }
+            }
+
+            drawPixel(index) {
+                const pixel = document.querySelector(`[data-index="${index}"]`);
+                if (!pixel) return;
+
+                switch (this.currentTool) {
+                    case 'brush':
+                        this.paintPixel(pixel, this.currentColor);
+                        if (this.symmetryH || this.symmetryV) {
+                            this.applySymmetry(index, this.currentColor);
+                        }
+                        break;
+                    case 'eraser':
+                        this.paintPixel(pixel, '#ffffff');
+                        if (this.symmetryH || this.symmetryV) {
+                            this.applySymmetry(index, '#ffffff');
+                        }
+                        break;
+                    case 'fill':
+                        this.floodFill(index, this.currentColor);
+                        break;
+                    case 'eyedropper':
+                        const color = this.getPixelColor(pixel);
+                        this.currentColor = color;
+                        document.getElementById('customColor').value = color;
+                        break;
+                }
+                
+                this.saveFrameData();
+            }
+
+            paintPixel(pixel, color) {
+                pixel.style.backgroundColor = color;
+            }
+
+            applySymmetry(index, color) {
+                const row = Math.floor(index / this.gridSize);
+                const col = index % this.gridSize;
+
+                if (this.symmetryH) {
+                    const mirrorCol = this.gridSize - 1 - col;
+                    const mirrorIndex = row * this.gridSize + mirrorCol;
+                    const mirrorPixel = document.querySelector(`[data-index="${mirrorIndex}"]`);
+                    if (mirrorPixel) this.paintPixel(mirrorPixel, color);
+                }
+
+                if (this.symmetryV) {
+                    const mirrorRow = this.gridSize - 1 - row;
+                    const mirrorIndex = mirrorRow * this.gridSize + col;
+                    const mirrorPixel = document.querySelector(`[data-index="${mirrorIndex}"]`);
+                    if (mirrorPixel) this.paintPixel(mirrorPixel, color);
+                }
+
+                if (this.symmetryH && this.symmetryV) {
+                    const mirrorRow = this.gridSize - 1 - row;
+                    const mirrorCol = this.gridSize - 1 - col;
+                    const mirrorIndex = mirrorRow * this.gridSize + mirrorCol;
+                    const mirrorPixel = document.querySelector(`[data-index="${mirrorIndex}"]`);
+                    if (mirrorPixel) this.paintPixel(mirrorPixel, color);
+                }
+            }
+
+            floodFill(startIndex, newColor) {
+                const startPixel = document.querySelector(`[data-index="${startIndex}"]`);
+                const originalColor = this.getPixelColor(startPixel);
+                
+                if (originalColor === newColor) return;
+
+                const stack = [startIndex];
+                const visited = new Set();
+
+                while (stack.length > 0) {
+                    const index = stack.pop();
+                    if (visited.has(index)) continue;
+                    visited.add(index);
+
+                    const pixel = document.querySelector(`[data-index="${index}"]`);
+                    if (!pixel || this.getPixelColor(pixel) !== originalColor) continue;
+
+                    this.paintPixel(pixel, newColor);
+
+                    const row = Math.floor(index / this.gridSize);
+                    const col = index % this.gridSize;
+
+                    if (col > 0) stack.push(index - 1);
+                    if (col < this.gridSize - 1) stack.push(index + 1);
+                    if (row > 0) stack.push(index - this.gridSize);
+                    if (row < this.gridSize - 1) stack.push(index + this.gridSize);
+                }
+            }
+
+            getPixelColor(pixel) {
+                const color = pixel.style.backgroundColor;
+                if (!color || color === '') return '#ffffff';
+                return this.rgbToHex(color);
+            }
+
+            rgbToHex(rgb) {
+                if (rgb.startsWith('#')) return rgb;
+                const result = rgb.match(/\d+/g);
+                if (!result) return '#ffffff';
+                return '#' + result.map(x => parseInt(x).toString(16).padStart(2, '0')).join('');
+            }
+
+            saveState() {
+                const state = this.getCanvasState();
+                this.history = this.history.slice(0, this.historyIndex + 1);
+                this.history.push(state);
+                if (this.history.length > this.maxHistory) {
+                    this.history.shift();
+                } else {
+                    this.historyIndex++;
+                }
+                this.updateUndoRedoButtons();
+            }
+
+            getCanvasState() {
+                const pixels = document.querySelectorAll('.pixel');
+                return Array.from(pixels).map(pixel => this.getPixelColor(pixel));
+            }
+
+            restoreState(state) {
+                const pixels = document.querySelectorAll('.pixel');
+                pixels.forEach((pixel, index) => {
+                    if (state[index]) {
+                        pixel.style.backgroundColor = state[index];
+                    }
+                });
+            }
+
+            undo() {
+                if (this.historyIndex > 0) {
+                    this.historyIndex--;
+                    this.restoreState(this.history[this.historyIndex]);
+                    this.updateUndoRedoButtons();
+                    this.updatePreview();
+                    this.saveFrameData();
+                }
+            }
+
+            redo() {
+                if (this.historyIndex < this.history.length - 1) {
+                    this.historyIndex++;
+                    this.restoreState(this.history[this.historyIndex]);
+                    this.updateUndoRedoButtons();
+                    this.updatePreview();
+                    this.saveFrameData();
+                }
+            }
+
+            updateUndoRedoButtons() {
+                document.getElementById('undoBtn').disabled = this.historyIndex <= 0;
+                document.getElementById('redoBtn').disabled = this.historyIndex >= this.history.length - 1;
+            }
+
+            updatePreview() {
+                const canvas = document.getElementById('previewCanvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = this.previewSize;
+                canvas.height = this.previewSize;
+                
+                ctx.imageSmoothingEnabled = false;
+                const pixelSize = this.previewSize / this.gridSize;
+                
+                ctx.clearRect(0, 0, this.previewSize, this.previewSize);
+                
+                const pixels = document.querySelectorAll('.pixel');
+                pixels.forEach((pixel, index) => {
+                    const row = Math.floor(index / this.gridSize);
+                    const col = index % this.gridSize;
+                    const color = this.getPixelColor(pixel);
+                    
+                    if (color !== '#ffffff') {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+                    }
+                });
+            }
+
+            addCustomColor() {
+                const customColor = document.getElementById('customColor').value;
+                if (!this.defaultColors.includes(customColor)) {
+                    this.defaultColors.push(customColor);
+                    this.createColorPalette();
+                }
+                this.currentColor = customColor;
+            }
+
+            clearCanvas() {
+                if (confirm('Are you sure you want to clear the canvas?')) {
+                    const pixels = document.querySelectorAll('.pixel');
+                    pixels.forEach(pixel => {
+                        pixel.style.backgroundColor = '#ffffff';
+                    });
+                    this.saveState();
+                    this.updatePreview();
+                    this.saveFrameData();
+                }
+            }
+
+            randomize() {
+                const pixels = document.querySelectorAll('.pixel');
+                pixels.forEach(pixel => {
+                    if (Math.random() > 0.7) {
+                        const randomColor = this.defaultColors[Math.floor(Math.random() * this.defaultColors.length)];
+                        pixel.style.backgroundColor = randomColor;
+                    } else {
+                        pixel.style.backgroundColor = '#ffffff';
+                    }
+                });
+                this.saveState();
+                this.updatePreview();
+                this.saveFrameData();
+            }
+
+            // Animation functions
+            addFrame() {
+                this.saveFrameData();
+                this.frames.push({});
+                this.currentFrame = this.frames.length - 1;
+                this.clearCanvas();
+                this.updateFramesList();
+            }
+
+            deleteFrame() {
+                if (this.frames.length > 1) {
+                    this.frames.splice(this.currentFrame, 1);
+                    if (this.currentFrame >= this.frames.length) {
+                        this.currentFrame = this.frames.length - 1;
+                    }
+                    this.loadFrame(this.currentFrame);
+                    this.updateFramesList();
+                }
+            }
+
+            saveFrameData() {
+                this.frames[this.currentFrame] = this.getCanvasState();
+            }
+
+            loadFrame(frameIndex) {
+                if (this.frames[frameIndex]) {
+                    this.restoreState(this.frames[frameIndex]);
+                    this.currentFrame = frameIndex;
+                    this.updatePreview();
+                }
+            }
+
+            updateFramesList() {
+                const framesList = document.getElementById('framesList');
+                framesList.innerHTML = '';
+                
+                this.frames.forEach((frame, index) => {
+                    const frameBtn = document.createElement('button');
+                    frameBtn.className = `frame-btn ${index === this.currentFrame ? 'active' : ''}`;
+                    frameBtn.textContent = index + 1;
+                    frameBtn.onclick = () => {
+                        this.saveFrameData();
+                        this.loadFrame(index);
+                        this.updateFramesList();
+                    };
+                    framesList.appendChild(frameBtn);
+                });
+            }
+
+            playAnimation() {
+                if (this.isAnimating) return;
+                
+                this.isAnimating = true;
+                let frameIndex = 0;
+                
+                this.animationInterval = setInterval(() => {
+                    this.loadFrame(frameIndex);
+                    frameIndex = (frameIndex + 1) % this.frames.length;
+                }, 200);
+            }
+
+            stopAnimation() {
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                    this.isAnimating = false;
+                    this.loadFrame(this.currentFrame);
+                }
+            }
+
+            exportPNG() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const exportSize = 512;
+                
+                canvas.width = exportSize;
+                canvas.height = exportSize;
+                ctx.imageSmoothingEnabled = false;
+                
+                const pixelSize = exportSize / this.gridSize;
+                const pixels = document.querySelectorAll('.pixel');
+                
+                // Set white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, exportSize, exportSize);
+                
+                pixels.forEach((pixel, index) => {
+                    const row = Math.floor(index / this.gridSize);
+                    const col = index % this.gridSize;
+                    const color = this.getPixelColor(pixel);
+                    
+                    if (color !== '#ffffff') {
+                        ctx.fillStyle = color;
+                        ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+                    }
+                });
+                
+                const link = document.createElement('a');
+                link.download = `pixel-avatar-${Date.now()}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+
+            exportGIF() {
+                if (this.frames.length === 1) {
+                    alert('Add more frames to export as GIF');
+                    return;
+                }
+                
+                // For demo purposes, export current frame as PNG
+                // In a real implementation, you'd use a GIF encoding library
+                alert('GIF export would require additional library. Exporting current frame as PNG instead.');
+                this.exportPNG();
+            }
+
+            saveProject() {
+                const projectData = {
+                    gridSize: this.gridSize,
+                    frames: this.frames,
+                    currentFrame: this.currentFrame,
+                    customColors: this.defaultColors.slice(32), // Custom colors added beyond defaults
+                    timestamp: Date.now()
+                };
+                
+                const dataStr = JSON.stringify(projectData, null, 2);
+                const link = document.createElement('a');
+                link.download = `pixel-avatar-project-${Date.now()}.json`;
+                link.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                link.click();
+            }
+
+            loadProject() {
+                const fileInput = document.getElementById('fileInput');
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const projectData = JSON.parse(e.target.result);
+                            this.loadProjectData(projectData);
+                        } catch (error) {
+                            alert('Invalid project file');
+                        }
+                    };
+                    reader.readAsText(file);
+                };
+                fileInput.click();
+            }
+
+            loadProjectData(projectData) {
+                if (projectData.gridSize) {
+                    this.gridSize = projectData.gridSize;
+                    document.getElementById('gridSize').value = this.gridSize;
+                    this.createCanvas();
+                }
+                
+                if (projectData.frames) {
+                    this.frames = projectData.frames;
+                    this.currentFrame = projectData.currentFrame || 0;
+                    this.loadFrame(this.currentFrame);
+                    this.updateFramesList();
+                }
+                
+                if (projectData.customColors) {
+                    this.defaultColors = [...this.defaultColors.slice(0, 32), ...projectData.customColors];
+                    this.createColorPalette();
+                }
+                
+                this.updatePreview();
+                this.saveState();
+            }
+
+            // Advanced features
+            applyFilter(filterType) {
+                const pixels = document.querySelectorAll('.pixel');
+                
+                switch (filterType) {
+                    case 'invert':
+                        pixels.forEach(pixel => {
+                            const color = this.getPixelColor(pixel);
+                            if (color !== '#ffffff') {
+                                const invertedColor = this.invertColor(color);
+                                pixel.style.backgroundColor = invertedColor;
+                            }
+                        });
+                        break;
+                    case 'grayscale':
+                        pixels.forEach(pixel => {
+                            const color = this.getPixelColor(pixel);
+                            if (color !== '#ffffff') {
+                                const grayColor = this.toGrayscale(color);
+                                pixel.style.backgroundColor = grayColor;
+                            }
+                        });
+                        break;
+                }
+                
+                this.saveState();
+                this.updatePreview();
+                this.saveFrameData();
+            }
+
+            invertColor(hex) {
+                const r = 255 - parseInt(hex.slice(1, 3), 16);
+                const g = 255 - parseInt(hex.slice(3, 5), 16);
+                const b = 255 - parseInt(hex.slice(5, 7), 16);
+                return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+            }
+
+            toGrayscale(hex) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                const gray = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+                return `#${gray.toString(16).padStart(2, '0')}${gray.toString(16).padStart(2, '0')}${gray.toString(16).padStart(2, '0')}`;
+            }
+        }
+
+        // Global functions
+        function addCustomColor() {
+            pixelMaker.addCustomColor();
+        }
+
+        function clearCanvas() {
+            pixelMaker.clearCanvas();
+        }
+
+        function randomize() {
+            pixelMaker.randomize();
+        }
+
+        function addFrame() {
+            pixelMaker.addFrame();
+        }
+
+        function deleteFrame() {
+            pixelMaker.deleteFrame();
+        }
+
+        function playAnimation() {
+            pixelMaker.playAnimation();
+        }
+
+        function stopAnimation() {
+            pixelMaker.stopAnimation();
+        }
+
+        function exportPNG() {
+            pixelMaker.exportPNG();
+        }
+
+        function exportGIF() {
+            pixelMaker.exportGIF();
+        }
+
+        function saveProject() {
+            pixelMaker.saveProject();
+        }
+
+        function loadProject() {
+            pixelMaker.loadProject();
+        }
+
+        // Initialize the application
+        const pixelMaker = new PixelAvatarMaker();
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            pixelMaker.redo();
+                        } else {
+                            pixelMaker.undo();
+                        }
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        pixelMaker.saveProject();
+                        break;
+                    case 'o':
+                        e.preventDefault();
+                        pixelMaker.loadProject();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        pixelMaker.exportPNG();
+                        break;
+                }
+            }
+            
+            // Tool shortcuts
+            switch (e.key) {
+                case 'b':
+                    document.querySelector('[data-tool="brush"]').click();
+                    break;
+                case 'e':
+                    if (!e.ctrlKey && !e.metaKey) {
+                        document.querySelector('[data-tool="eraser"]').click();
+                    }
+                    break;
+                case 'f':
+                    document.querySelector('[data-tool="fill"]').click();
+                    break;
+                case 'i':
+                    document.querySelector('[data-tool="eyedropper"]').click();
+                    break;
+            }
+        });
+
+        // Add touch support for mobile devices
+        if ('ontouchstart' in window) {
+            const canvas = document.getElementById('pixelCanvas');
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (element && element.classList.contains('pixel')) {
+                    const index = parseInt(element.dataset.index);
+                    pixelMaker.startDrawing(e, index);
+                }
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const element = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (element && element.classList.contains('pixel')) {
+                    const index = parseInt(element.dataset.index);
+                    pixelMaker.continueDraw(e, index);
+                }
+            });
+
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                pixelMaker.stopDrawing();
+            });
+        }
+
+        // Add performance monitoring
+        let frameCount = 0;
+        let lastTime = performance.now();
+
+        function updatePerformance() {
+            frameCount++;
+            const currentTime = performance.now();
+            
+            if (currentTime - lastTime >= 1000) {
+                // Performance monitoring code here
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+            
+            requestAnimationFrame(updatePerformance);
+        }
+
+        updatePerformance();
+    </script>
+</body>
+</html>
