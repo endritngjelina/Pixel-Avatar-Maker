@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Avatar Maker Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 300px 1fr 280px;
+            gap: 20px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .sidebar {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #495057;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 5px;
+        }
+
+        .canvas-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            border: 3px solid #dee2e6;
+            border-radius: 10px;
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #pixelCanvas {
+            display: block;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn.active {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            transform: none;
+        }
+
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .color-swatch {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .color-swatch.active {
+            border-color: #007bff;
+            border-width: 3px;
+            transform: scale(1.1);
+        }
+
+        .custom-color {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #colorPicker {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .preset-avatars {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .preset-avatar {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            image-rendering: pixelated;
+        }
+
+        .preset-avatar:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .animation-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .layers-panel {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .layer-item:hover {
+            background: #e9ecef;
+        }
+
+        .layer-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .layer-visibility {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .stats {
+            background: #e3f2fd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .stats h4 {
+            margin-bottom: 10px;
+            color: #1976d2;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .history-panel {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px;
+        }
+
+        .history-item {
+            padding: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-bottom: 5px;
+            background: #f8f9fa;
+        }
+
+        .history-item:hover {
+            background: #e9ecef;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .zoom-slider {
+            flex: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .workspace {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Pixel Avatar Maker Pro</h1>
+            <p>Create stunning pixel art avatars with professional-grade tools</p>
+        </div>
+
+        <div class="workspace">
+            <!-- Left Sidebar - Tools & Colors -->
+            <div class="sidebar">
+                <div class="section">
+                    <h3>🎨 Color Palette</h3>
+                    <div class="color-palette" id="colorPalette"></div>
+                    <div class="custom-color">
+                        <input type="color" id="colorPicker" value="#000000">
+                        <button class="btn btn-secondary" onclick="addCustomColor()">Add Color</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>🛠️ Drawing Tools</h3>
+                    <div class="tool-grid">
+                        <button class="btn btn-primary active" onclick="setTool('brush')" data-tool="brush">Brush</button>
+                        <button class="btn btn-secondary" onclick="setTool('eraser')" data-tool="eraser">Eraser</button>
+                        <button class="btn btn-secondary" onclick="setTool('eyedropper')" data-tool="eyedropper">Eyedropper</button>
+                        <button class="btn btn-secondary" onclick="setTool('fill')" data-tool="fill">Fill</button>
+                        <button class="btn btn-secondary" onclick="setTool('line')" data-tool="line">Line</button>
+                        <button class="btn btn-secondary" onclick="setTool('rectangle')" data-tool="rectangle">Rectangle</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>⚙️ Canvas Settings</h3>
+                    <div class="input-group">
+                        <label>Canvas Size</label>
+                        <select id="canvasSize" onchange="changeCanvasSize()">
+                            <option value="16">16x16</option>
+                            <option value="24">24x24</option>
+                            <option value="32" selected>32x32</option>
+                            <option value="48">48x48</option>
+                            <option value="64">64x64</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Brush Size</label>
+                        <select id="brushSize" onchange="setBrushSize()">
+                            <option value="1" selected>1px</option>
+                            <option value="2">2px</option>
+                            <option value="3">3px</option>
+                            <option value="4">4px</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>📐 Symmetry</h3>
+                    <div class="tool-grid">
+                        <button class="btn btn-secondary" onclick="toggleSymmetry('horizontal')" id="symmetryH">Horizontal</button>
+                        <button class="btn btn-secondary" onclick="toggleSymmetry('vertical')" id="symmetryV">Vertical</button>
+                        <button class="btn btn-secondary" onclick="toggleSymmetry('diagonal')" id="symmetryD">Diagonal</button>
+                        <button class="btn btn-secondary" onclick="toggleSymmetry('quad')" id="symmetryQ">Quad</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Canvas Area -->
+            <div class="canvas-container">
+                <div class="canvas-wrapper">
+                    <canvas id="pixelCanvas" width="512" height="512"></canvas>
+                    <canvas class="grid-overlay" id="gridOverlay" width="512" height="512"></canvas>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" onclick="clearCanvas()">🗑️ Clear</button>
+                    <button class="btn btn-warning" onclick="undo()">↶ Undo</button>
+                    <button class="btn btn-warning" onclick="redo()">↷ Redo</button>
+                    <button class="btn btn-success" onclick="exportPNG()">💾 Export PNG</button>
+                    <button class="btn btn-primary" onclick="exportGIF()">🎬 Export GIF</button>
+                    <button class="btn btn-secondary" onclick="toggleGrid()">⊞ Toggle Grid</button>
+                </div>
+
+                <div class="zoom-controls">
+                    <button class="btn btn-secondary" onclick="zoomOut()">-</button>
+                    <input type="range" class="zoom-slider" id="zoomSlider" min="1" max="20" value="16" onchange="setZoom(this.value)">
+                    <button class="btn btn-secondary" onclick="zoomIn()">+</button>
+                    <span id="zoomLevel">16x</span>
+                </div>
+
+                <div class="animation-controls">
+                    <button class="btn btn-primary" onclick="addFrame()">➕ Add Frame</button>
+                    <button class="btn btn-secondary" onclick="deleteFrame()">➖ Delete Frame</button>
+                    <button class="btn btn-success" onclick="playAnimation()" id="playBtn">▶️ Play</button>
+                    <span>Frame: <span id="currentFrame">1</span>/<span id="totalFrames">1</span></span>
+                    <button class="btn btn-secondary" onclick="previousFrame()">◀️</button>
+                    <button class="btn btn-secondary" onclick="nextFrame()">▶️</button>
+                </div>
+            </div>
+
+            <!-- Right Sidebar - Presets & Layers -->
+            <div class="sidebar">
+                <div class="section">
+                    <h3>🖼️ Preset Avatars</h3>
+                    <div class="preset-avatars" id="presetAvatars"></div>
+                </div>
+
+                <div class="section">
+                    <h3>📋 Layers</h3>
+                    <div class="layers-panel" id="layersPanel">
+                        <div class="layer-item active" data-layer="0">
+                            <div class="layer-visibility" onclick="toggleLayerVisibility(0)">👁️</div>
+                            <span>Background</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addLayer()">➕ Add Layer</button>
+                </div>
+
+                <div class="section">
+                    <h3>📜 History</h3>
+                    <div class="history-panel" id="historyPanel"></div>
+                    <button class="btn btn-secondary" onclick="clearHistory()">Clear History</button>
+                </div>
+
+                <div class="stats">
+                    <h4>📊 Canvas Stats</h4>
+                    <div class="stat-item">
+                        <span>Pixels Used:</span>
+                        <span id="pixelsUsed">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Colors Used:</span>
+                        <span id="colorsUsed">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Frames:</span>
+                        <span id="frameCount">1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Core application state
+        const app = {
+            canvas: null,
+            ctx: null,
+            gridCanvas: null,
+            gridCtx: null,
+            currentTool: 'brush',
+            currentColor: '#000000',
+            brushSize: 1,
+            canvasSize: 32,
+            pixelSize: 16,
+            isDrawing: false,
+            lastX: 0,
+            lastY: 0,
+            history: [],
+            historyStep: 0,
+            symmetry: {
+                horizontal: false,
+                vertical: false,
+                diagonal: false,
+                quad: false
+            },
+            layers: [{ data: null, visible: true, name: 'Background' }],
+            currentLayer: 0,
+            frames: [null],
+            currentFrame: 0,
+            isAnimating: false,
+            animationSpeed: 500,
+            showGrid: true
+        };
+
+        // Color palette
+        const defaultColors = [
+            '#000000', '#FFFFFF', '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+            '#800000', '#008000', '#000080', '#808000', '#800080', '#008080', '#C0C0C0', '#808080',
+            '#FFA500', '#A52A2A', '#DDA0DD', '#98FB98', '#F0E68C', '#DEB887', '#CD853F', '#D2B48C',
+            '#FF6347', '#40E0D0', '#EE82EE', '#90EE90', '#FFB6C1', '#87CEEB', '#778899', '#B0C4DE'
+        ];
+
+        // Initialize the application
+        function init() {
+            app.canvas = document.getElementById('pixelCanvas');
+            app.ctx = app.canvas.getContext('2d');
+            app.gridCanvas = document.getElementById('gridOverlay');
+            app.gridCtx = app.gridCanvas.getContext('2d');
+
+            // Set up canvas properties
+            app.ctx.imageSmoothingEnabled = false;
+            app.gridCtx.imageSmoothingEnabled = false;
+
+            initializeColorPalette();
+            initializeCanvas();
+            setupEventListeners();
+            generatePresetAvatars();
+            saveState();
+            updateStats();
+            drawGrid();
+        }
+
+        function initializeCanvas() {
+            const size = app.canvasSize * app.pixelSize;
+            app.canvas.width = size;
+            app.canvas.height = size;
+            app.gridCanvas.width = size;
+            app.gridCanvas.height = size;
+            
+            // Initialize first frame
+            app.frames[0] = app.ctx.createImageData(app.canvasSize, app.canvasSize);
+            clearCanvas();
+        }
+
+        function initializeColorPalette() {
+            const palette = document.getElementById('colorPalette');
+            palette.innerHTML = '';
+            
+            defaultColors.forEach((color, index) => {
+                const swatch = document.createElement('div');
+                swatch.className = 'color-swatch';
+                swatch.style.backgroundColor = color;
+                swatch.onclick = () => selectColor(color);
+                if (index === 0) swatch.classList.add('active');
+                palette.appendChild(swatch);
+            });
+        }
+
+        function setupEventListeners() {
+            // Mouse events
+            app.canvas.addEventListener('mousedown', startDrawing);
+            app.canvas.addEventListener('mousemove', draw);
+            app.canvas.addEventListener('mouseup', stopDrawing);
+            app.canvas.addEventListener('mouseout', stopDrawing);
+            
+            // Touch events for mobile
+            app.canvas.addEventListener('touchstart', handleTouch);
+            app.canvas.addEventListener('touchmove', handleTouch);
+            app.canvas.addEventListener('touchend', stopDrawing);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyboard);
+        }
+
+        function getCanvasCoordinates(e) {
+            const rect = app.canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / app.pixelSize);
+            const y = Math.floor((e.clientY - rect.top) / app.pixelSize);
+            return { x, y };
+        }
+
+        function startDrawing(e) {
+            app.isDrawing = true;
+            const coords = getCanvasCoordinates(e);
+            app.lastX = coords.x;
+            app.lastY = coords.y;
+            
+            if (app.currentTool === 'eyedropper') {
+                eyedropColor(coords.x, coords.y);
+                return;
+            }
+            
+            draw(e);
+        }
+
+        function draw(e) {
+            if (!app.isDrawing && app.currentTool !== 'eyedropper') return;
+            
+            const coords = getCanvasCoordinates(e);
+            
+            switch (app.currentTool) {
+                case 'brush':
+                    drawBrush(coords.x, coords.y);
+                    break;
+                case 'eraser':
+                    eraseBrush(coords.x, coords.y);
+                    break;
+                case 'fill':
+                    if (app.isDrawing) {
+                        floodFill(coords.x, coords.y);
+                        app.isDrawing = false;
+                    }
+                    break;
+                case 'line':
+                    if (app.isDrawing) {
+                        drawLine(app.lastX, app.lastY, coords.x, coords.y);
+                    }
+                    break;
+                case 'rectangle':
+                    if (app.isDrawing) {
+                        drawRectangle(app.lastX, app.lastY, coords.x, coords.y);
+                    }
+                    break;
+            }
+            
+            updateCanvas();
+            updateStats();
+        }
+
+        function stopDrawing() {
+            if (app.isDrawing) {
+                app.isDrawing = false;
+                saveState();
+            }
+        }
+
+        function drawBrush(x, y) {
+            const imageData = app.frames[app.currentFrame];
+            const size = app.brushSize;
+            
+            for (let dx = 0; dx < size; dx++) {
+                for (let dy = 0; dy < size; dy++) {
+                    const px = x + dx;
+                    const py = y + dy;
+                    if (px >= 0 && px < app.canvasSize && py >= 0 && py < app.canvasSize) {
+                        setPixel(imageData, px, py, app.currentColor);
+                        applySymmetry(px, py, app.currentColor);
+                    }
+                }
+            }
+        }
+
+        function eraseBrush(x, y) {
+            const imageData = app.frames[app.currentFrame];
+            const size = app.brushSize;
+            
+            for (let dx = 0; dx < size; dx++) {
+                for (let dy = 0; dy < size; dy++) {
+                    const px = x + dx;
+                    const py = y + dy;
+                    if (px >= 0 && px < app.canvasSize && py >= 0 && py < app.canvasSize) {
+                        setPixel(imageData, px, py, 'transparent');
+                        applySymmetry(px, py, 'transparent');
+                    }
+                }
+            }
+        }
+
+        function setPixel(imageData, x, y, color) {
+            const index = (y * app.canvasSize + x) * 4;
+            
+            if (color === 'transparent') {
+                imageData.data[index] = 0;
+                imageData.data[index + 1] = 0;
+                imageData.data[index + 2] = 0;
+                imageData.data[index + 3] = 0;
+            } else {
+                const rgb = hexToRgb(color);
+                imageData.data[index] = rgb.r;
+                imageData.data[index + 1] = rgb.g;
+                imageData.data[index + 2] = rgb.b;
+                imageData.data[index + 3] = 255;
+            }
+        }
+
+        function applySymmetry(x, y, color) {
+            const imageData = app.frames[app.currentFrame];
+            const center = app.canvasSize / 2;
+            
+            if (app.symmetry.horizontal) {
+                const mirrorY = app.canvasSize - 1 - y;
+                setPixel(imageData, x, mirrorY, color);
+            }
+            
+            if (app.symmetry.vertical) {
+                const mirrorX = app.canvasSize - 1 - x;
+                setPixel(imageData, mirrorX, y, color);
+            }
+            
+            if (app.symmetry.diagonal) {
+                setPixel(imageData, y, x, color);
+            }
+            
+            if (app.symmetry.quad) {
+                const mirrorX = app.canvasSize - 1 - x;
+                const mirrorY = app.canvasSize - 1 - y;
+                setPixel(imageData, mirrorX, y, color);
+                setPixel(imageData, x, mirrorY, color);
+                setPixel(imageData, mirrorX, mirrorY, color);
+            }
+        }
+
+        function floodFill(startX, startY) {
+            const imageData = app.frames[app.currentFrame];
+            const targetColor = getPixelColor(imageData, startX, startY);
+            const fillColor = app.currentColor;
+            
+            if (targetColor === fillColor) return;
+            
+            const stack = [{x: startX, y: startY}];
+            const visited = new Set();
+            
+            while (stack.length > 0) {
+                const {x, y} = stack.pop();
+                const key = `${x},${y}`;
+                
+                if (visited.has(key) || x < 0 || x >= app.canvasSize || y < 0 || y >= app.canvasSize) continue;
+                if (getPixelColor(imageData, x, y) !== targetColor) continue;
+                
+                visited.add(key);
+                setPixel(imageData, x, y, fillColor);
+                
+                stack.push({x: x + 1, y: y});
+                stack.push({x: x - 1, y: y});
+                stack.push({x: x, y: y + 1});
+                stack.push({x: x, y: y - 1});
+            }
+        }
+
+        function getPixelColor(imageData, x, y) {
+            const index = (y * app.canvasSize + x) * 4;
+            const r = imageData.data[index];
+            const g = imageData.data[index + 1];
+            const b = imageData.data[index + 2];
+            const a = imageData.data[index + 3];
+            
+            if (a === 0) return 'transparent';
+            return rgbToHex(r, g, b);
+        }
+
+        function updateCanvas() {
+            app.ctx.clearRect(0, 0, app.canvas.width, app.canvas.height);
+            
+            // Create a temporary canvas for pixel-perfect rendering
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = app.canvasSize;
+            tempCanvas.height = app.canvasSize;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(app.frames[app.currentFrame], 0, 0);
+            
+            // Scale up to display canvas
+            app.ctx.imageSmoothingEnabled = false;
+            app.ctx.drawImage(tempCanvas, 0, 0, app.canvas.width, app.canvas.height);
+        }
+
+        function drawGrid() {
+            if (!app.showGrid) {
+                app.gridCtx.clearRect(0, 0, app.gridCanvas.width, app.gridCanvas.height);
+                return;
+            }
+            
+            app.gridCtx.clearRect(0, 0, app.gridCanvas.width, app.gridCanvas.height);
+            app.gridCtx.strokeStyle = '#ddd';
+            app.gridCtx.lineWidth = 1;
+            
+            for (let i = 0; i <= app.canvasSize; i++) {
+                const pos = i * app.pixelSize;
+                app.gridCtx.beginPath();
+                app.gridCtx.moveTo(pos, 0);
+                app.gridCtx.lineTo(pos, app.canvas.height);
+                app.gridCtx.stroke();
+                
+                app.gridCtx.beginPath();
+                app.gridCtx.moveTo(0, pos);
+                app.gridCtx.lineTo(app.canvas.width, pos);
+                app.gridCtx.stroke();
+            }
+        }
+
+        // Tool functions
+        function setTool(tool) {
+            app.currentTool = tool;
+            document.querySelectorAll('[data-tool]').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-tool="${tool}"]`).classList.add('active');
+        }
+
+        function selectColor(color) {
+            app.currentColor = color;
+            document.querySelectorAll('.color-swatch').forEach(swatch => swatch.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('colorPicker').value = color;
+        }
+
+        function addCustomColor() {
+            const color = document.getElementById('colorPicker').value;
+            const palette = document.getElementById('colorPalette');
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.onclick = () => selectColor(color);
+            palette.appendChild(swatch);
+            selectColor(color);
+        }
+
+        function toggleSymmetry(type) {
+            app.symmetry[type] = !app.symmetry[type];
+            const btn = document.getElementById('symmetry' + type.charAt(0).toUpperCase());
+            btn.classList.toggle('active', app.symmetry[type]);
+        }
+
+        function changeCanvasSize() {
+            const newSize = parseInt(document.getElementById('canvasSize').value);
+            app.canvasSize = newSize;
+            app.pixelSize = Math.floor(512 / newSize);
+            initializeCanvas();
+            drawGrid();
+            updateStats();
+        }
+
+        function setBrushSize() {
+            app.brushSize = parseInt(document.getElementById('brushSize').value);
+        }
+
+        function clearCanvas() {
+            const imageData = app.ctx.createImageData(app.canvasSize, app.canvasSize);
+            
+            // Fill with transparent pixels
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                imageData.data[i] = 0;     // R
+                imageData.data[i + 1] = 0; // G
+                imageData.data[i + 2] = 0; // B
+                imageData.data[i + 3] = 0; // A (transparent)
+            }
+            
+            app.frames[app.currentFrame] = imageData;
+            updateCanvas();
+            saveState();
+            updateStats();
+        }
+
+        function toggleGrid() {
+            app.showGrid = !app.showGrid;
+            drawGrid();
+        }
+
+        // Animation functions
+        function addFrame() {
+            const newFrame = app.ctx.createImageData(app.canvasSize, app.canvasSize);
+            // Copy current frame
+            const currentImageData = app.frames[app.currentFrame];
+            for (let i = 0; i < newFrame.data.length; i++) {
+                newFrame.data[i] = currentImageData.data[i];
+            }
+            
+            app.frames.push(newFrame);
+            app.currentFrame = app.frames.length - 1;
+            updateFrameDisplay();
+            updateStats();
+        }
+
+        function deleteFrame() {
+            if (app.frames.length <= 1) return;
+            
+            app.frames.splice(app.currentFrame, 1);
+            if (app.currentFrame >= app.frames.length) {
+                app.currentFrame = app.frames.length - 1;
+            }
+            updateCanvas();
+            updateFrameDisplay();
+            updateStats();
+        }
+
+        function nextFrame() {
+            if (app.currentFrame < app.frames.length - 1) {
+                app.currentFrame++;
+                updateCanvas();
+                updateFrameDisplay();
+            }
+        }
+
+        function previousFrame() {
+            if (app.currentFrame > 0) {
+                app.currentFrame--;
+                updateCanvas();
+                updateFrameDisplay();
+            }
+        }
+
+        function updateFrameDisplay() {
+            document.getElementById('currentFrame').textContent = app.currentFrame + 1;
+            document.getElementById('totalFrames').textContent = app.frames.length;
+            document.getElementById('frameCount').textContent = app.frames.length;
+        }
+
+        function playAnimation() {
+            const playBtn = document.getElementById('playBtn');
+            
+            if (app.isAnimating) {
+                app.isAnimating = false;
+                playBtn.textContent = '▶️ Play';
+                clearInterval(app.animationInterval);
+            } else {
+                app.isAnimating = true;
+                playBtn.textContent = '⏸️ Stop';
+                
+                app.animationInterval = setInterval(() => {
+                    app.currentFrame = (app.currentFrame + 1) % app.frames.length;
+                    updateCanvas();
+                    updateFrameDisplay();
+                }, app.animationSpeed);
+            }
+        }
+
+        // History and undo/redo
+        function saveState() {
+            // Limit history size
+            if (app.history.length > 50) {
+                app.history.shift();
+            }
+            
+            // Remove any future states if we're not at the end
+            app.history = app.history.slice(0, app.historyStep + 1);
+            
+            // Save current state
+            const state = {
+                frameData: app.frames.map(frame => {
+                    const data = new Uint8ClampedArray(frame.data);
+                    return app.ctx.createImageData(app.canvasSize, app.canvasSize);
+                }),
+                currentFrame: app.currentFrame,
+                timestamp: Date.now()
+            };
+            
+            // Copy the actual pixel data
+            app.frames.forEach((frame, index) => {
+                for (let i = 0; i < frame.data.length; i++) {
+                    state.frameData[index].data[i] = frame.data[i];
+                }
+            });
+            
+            app.history.push(state);
+            app.historyStep = app.history.length - 1;
+            updateHistoryPanel();
+        }
+
+        function undo() {
+            if (app.historyStep > 0) {
+                app.historyStep--;
+                restoreState(app.history[app.historyStep]);
+            }
+        }
+
+        function redo() {
+            if (app.historyStep < app.history.length - 1) {
+                app.historyStep++;
+                restoreState(app.history[app.historyStep]);
+            }
+        }
+
+        function restoreState(state) {
+            app.frames = state.frameData.map(frame => {
+                const newFrame = app.ctx.createImageData(app.canvasSize, app.canvasSize);
+                for (let i = 0; i < frame.data.length; i++) {
+                    newFrame.data[i] = frame.data[i];
+                }
+                return newFrame;
+            });
+            app.currentFrame = state.currentFrame;
+            updateCanvas();
+            updateFrameDisplay();
+            updateStats();
+        }
+
+        function updateHistoryPanel() {
+            const panel = document.getElementById('historyPanel');
+            panel.innerHTML = '';
+            
+            app.history.forEach((state, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.textContent = `State ${index + 1} - ${new Date(state.timestamp).toLocaleTimeString()}`;
+                item.onclick = () => {
+                    app.historyStep = index;
+                    restoreState(state);
+                };
+                if (index === app.historyStep) {
+                    item.style.background = '#667eea';
+                    item.style.color = 'white';
+                }
+                panel.appendChild(item);
+            });
+        }
+
+        function clearHistory() {
+            app.history = [app.history[app.historyStep]];
+            app.historyStep = 0;
+            updateHistoryPanel();
+        }
+
+        // Export functions
+        function exportPNG() {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = app.canvasSize;
+            tempCanvas.height = app.canvasSize;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.putImageData(app.frames[app.currentFrame], 0, 0);
+            
+            const link = document.createElement('a');
+            link.download = `pixel-avatar-${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL();
+            link.click();
+            
+            showNotification('PNG exported successfully!');
+        }
+
+        function exportGIF() {
+            if (app.frames.length === 1) {
+                exportPNG();
+                return;
+            }
+            
+            // Create animated canvas representation
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = app.canvasSize * 4; // Scale up for better quality
+            tempCanvas.height = app.canvasSize * 4;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.imageSmoothingEnabled = false;
+            
+            // For demo purposes, export the current frame as PNG
+            // In a real implementation, you'd use a GIF encoding library
+            tempCtx.putImageData(app.frames[app.currentFrame], 0, 0);
+            tempCtx.drawImage(tempCanvas, 0, 0, app.canvasSize, app.canvasSize, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            const link = document.createElement('a');
+            link.download = `pixel-avatar-animated-${Date.now()}.png`;
+            link.href = tempCanvas.toDataURL();
+            link.click();
+            
+            showNotification('Animation exported! (Note: GIF encoding requires additional library)');
+        }
+
+        // Zoom controls
+        function setZoom(value) {
+            app.pixelSize = parseInt(value);
+            const size = app.canvasSize * app.pixelSize;
+            app.canvas.width = size;
+            app.canvas.height = size;
+            app.gridCanvas.width = size;
+            app.gridCanvas.height = size;
+            updateCanvas();
+            drawGrid();
+            document.getElementById('zoomLevel').textContent = value + 'x';
+        }
+
+        function zoomIn() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider.value < slider.max) {
+                slider.value = parseInt(slider.value) + 1;
+                setZoom(slider.value);
+            }
+        }
+
+        function zoomOut() {
+            const slider = document.getElementById('zoomSlider');
+            if (slider.value > slider.min) {
+                slider.value = parseInt(slider.value) - 1;
+                setZoom(slider.value);
+            }
+        }
+
+        // Preset avatars
+        function generatePresetAvatars() {
+            const container = document.getElementById('presetAvatars');
+            const presets = [
+                // Simple smiley face
+                {
+                    name: 'Smiley',
+                    data: generateSmileyData()
+                },
+                // Pixel skull
+                {
+                    name: 'Skull',
+                    data: generateSkullData()
+                },
+                // Robot face
+                {
+                    name: 'Robot',
+                    data: generateRobotData()
+                },
+                // Cat face
+                {
+                    name: 'Cat',
+                    data: generateCatData()
+                },
+                // Ninja
+                {
+                    name: 'Ninja',
+                    data: generateNinjaData()
+                },
+                // Alien
+                {
+                    name: 'Alien',
+                    data: generateAlienData()
+                }
+            ];
+            
+            presets.forEach(preset => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 60;
+                canvas.height = 60;
+                canvas.className = 'preset-avatar';
+                canvas.title = preset.name;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = false;
+                
+                // Draw preset
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 16;
+                tempCanvas.height = 16;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(preset.data, 0, 0);
+                
+                ctx.drawImage(tempCanvas, 0, 0, 60, 60);
+                
+                canvas.onclick = () => loadPreset(preset.data);
+                container.appendChild(canvas);
+            });
+        }
+
+        function generateSmileyData() {
+            const imageData = new ImageData(16, 16);
+            const pixels = [
+                [5,5], [6,5], [9,5], [10,5], // Eyes
+                [4,9], [5,10], [6,10], [7,10], [8,10], [9,10], [10,10], [11,9] // Smile
+            ];
+            
+            pixels.forEach(([x, y]) => {
+                setPixelInImageData(imageData, x, y, '#000000');
+            });
+            
+            return imageData;
+        }
+
+        function generateSkullData() {
+            const imageData = new ImageData(16, 16);
+            const pixels = [
+                // Skull outline and features
+                [7,2], [8,2], [6,3], [9,3], [5,4], [6,4], [9,4], [10,4],
+                [5,5], [10,5], [4,6], [5,6], [6,6], [9,6], [10,6], [11,6],
+                [4,7], [11,7], [4,8], [11,8], [5,9], [6,9], [9,9], [10,9],
+                [6,10], [7,10], [8,10], [9,10], // Bottom
+                [6,5], [9,5], // Eye sockets
+                [7,7], [8,7] // Nose
+            ];
+            
+            pixels.forEach(([x, y]) => {
+                setPixelInImageData(imageData, x, y, '#FFFFFF');
+            });
+            
+            return imageData;
+        }
+
+        function generateRobotData() {
+            const imageData = new ImageData(16, 16);
+            // Robot head outline
+            for (let x = 4; x <= 11; x++) {
+                for (let y = 3; y <= 12; y++) {
+                    if (x === 4 || x === 11 || y === 3 || y === 12) {
+                        setPixelInImageData(imageData, x, y, '#808080');
+                    } else {
+                        setPixelInImageData(imageData, x, y, '#C0C0C0');
+                    }
+                }
+            }
+            
+            // Eyes
+            setPixelInImageData(imageData, 6, 6, '#FF0000');
+            setPixelInImageData(imageData, 9, 6, '#FF0000');
+            
+            // Mouth
+            for (let x = 6; x <= 9; x++) {
+                setPixelInImageData(imageData, x, 9, '#000000');
+            }
+            
+            return imageData;
+        }
+
+        function generateCatData() {
+            const imageData = new ImageData(16, 16);
+            
+            // Cat ears
+            setPixelInImageData(imageData, 5, 4, '#FFA500');
+            setPixelInImageData(imageData, 6, 3, '#FFA500');
+            setPixelInImageData(imageData, 9, 3, '#FFA500');
+            setPixelInImageData(imageData, 10, 4, '#FFA500');
+            
+            // Cat face
+            for (let x = 6; x <= 9; x++) {
+                for (let y = 5; y <= 10; y++) {
+                    setPixelInImageData(imageData, x, y, '#FFA500');
+                }
+            }
+            
+            // Eyes
+            setPixelInImageData(imageData, 6, 7, '#000000');
+            setPixelInImageData(imageData, 9, 7, '#000000');
+            
+            // Nose
+            setPixelInImageData(imageData, 7, 8, '#FF69B4');
+            setPixelInImageData(imageData, 8, 8, '#FF69B4');
+            
+            return imageData;
+        }
+
+        function generateNinjaData() {
+            const imageData = new ImageData(16, 16);
+            
+            // Ninja mask (black)
+            for (let x = 5; x <= 10; x++) {
+                for (let y = 4; y <= 11; y++) {
+                    setPixelInImageData(imageData, x, y, '#000000');
+                }
+            }
+            
+            // Eyes
+            setPixelInImageData(imageData, 6, 6, '#FFFFFF');
+            setPixelInImageData(imageData, 9, 6, '#FFFFFF');
+            
+            return imageData;
+        }
+
+        function generateAlienData() {
+            const imageData = new ImageData(16, 16);
+            
+            // Alien head (green)
+            for (let x = 6; x <= 9; x++) {
+                for (let y = 4; y <= 10; y++) {
+                    setPixelInImageData(imageData, x, y, '#00FF00');
+                }
+            }
+            
+            // Extended head
+            for (let x = 5; x <= 10; x++) {
+                for (let y = 5; y <= 8; y++) {
+                    setPixelInImageData(imageData, x, y, '#00FF00');
+                }
+            }
+            
+            // Large eyes
+            setPixelInImageData(imageData, 6, 6, '#000000');
+            setPixelInImageData(imageData, 7, 6, '#000000');
+            setPixelInImageData(imageData, 8, 6, '#000000');
+            setPixelInImageData(imageData, 9, 6, '#000000');
+            
+            return imageData;
+        }
+
+        function setPixelInImageData(imageData, x, y, color) {
+            const index = (y * imageData.width + x) * 4;
+            const rgb = hexToRgb(color);
+            imageData.data[index] = rgb.r;
+            imageData.data[index + 1] = rgb.g;
+            imageData.data[index + 2] = rgb.b;
+            imageData.data[index + 3] = 255;
+        }
+
+        function loadPreset(presetData) {
+            // Scale preset to current canvas size
+            const scaledData = app.ctx.createImageData(app.canvasSize, app.canvasSize);
+            const scale = app.canvasSize / 16;
+            
+            for (let x = 0; x < 16; x++) {
+                for (let y = 0; y < 16; y++) {
+                    const sourceIndex = (y * 16 + x) * 4;
+                    const r = presetData.data[sourceIndex];
+                    const g = presetData.data[sourceIndex + 1];
+                    const b = presetData.data[sourceIndex + 2];
+                    const a = presetData.data[sourceIndex + 3];
+                    
+                    if (a > 0) {
+                        for (let sx = 0; sx < scale; sx++) {
+                            for (let sy = 0; sy < scale; sy++) {
+                                const targetX = Math.floor(x * scale + sx);
+                                const targetY = Math.floor(y * scale + sy);
+                                if (targetX < app.canvasSize && targetY < app.canvasSize) {
+                                    const targetIndex = (targetY * app.canvasSize + targetX) * 4;
+                                    scaledData.data[targetIndex] = r;
+                                    scaledData.data[targetIndex + 1] = g;
+                                    scaledData.data[targetIndex + 2] = b;
+                                    scaledData.data[targetIndex + 3] = a;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            app.frames[app.currentFrame] = scaledData;
+            updateCanvas();
+            saveState();
+            updateStats();
+        }
+
+        // Utility functions
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function updateStats() {
+            const imageData = app.frames[app.currentFrame];
+            let pixelsUsed = 0;
+            const colorsUsed = new Set();
+            
+            for (let i = 0; i < imageData.data.length; i += 4) {
+                const a = imageData.data[i + 3];
+                if (a > 0) {
+                    pixelsUsed++;
+                    const r = imageData.data[i];
+                    const g = imageData.data[i + 1];
+                    const b = imageData.data[i + 2];
+                    colorsUsed.add(rgbToHex(r, g, b));
+                }
+            }
+            
+            document.getElementById('pixelsUsed').textContent = pixelsUsed;
+            document.getElementById('colorsUsed').textContent = colorsUsed.size;
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+            setTimeout(() => notification.classList.remove('show'), 3000);
+        }
+
+        function handleKeyboard(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'z':
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            redo();
+                        } else {
+                            undo();
+                        }
+                        break;
+                    case 's':
+                        e.preventDefault();
+                        exportPNG();
+                        break;
+                }
+            }
+            
+            // Tool shortcuts
+            switch (e.key) {
+                case 'b': setTool('brush'); break;
+                case 'e': setTool('eraser'); break;
+                case 'i': setTool('eyedropper'); break;
+                case 'f': setTool('fill'); break;
+                case 'l': setTool('line'); break;
+                case 'r': setTool('rectangle'); break;
+                case 'g': toggleGrid(); break;
+            }
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                            e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+            app.canvas.dispatchEvent(mouseEvent);
+        }
+
+        function eyedropColor(x, y) {
+            const imageData = app.frames[app.currentFrame];
+            const color = getPixelColor(imageData, x, y);
+            if (color !== 'transparent') {
+                selectColor(color);
+                // Find and activate the color swatch
+                document.querySelectorAll('.color-swatch').forEach(swatch => {
+                    if (swatch.style.backgroundColor === color || 
+                        rgbToHex(...swatch.style.backgroundColor.match(/\d+/g).map(Number)) === color) {
+                        swatch.classList.add('active');
+                    } else {
+                        swatch.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        function drawLine(x1, y1, x2, y2) {
+            // Bresenham's line algorithm
+            const dx = Math.abs(x2 - x1);
+            const dy = Math.abs(y2 - y1);
+            const sx = x1 < x2 ? 1 : -1;
+            const sy = y1 < y2 ? 1 : -1;
+            let err = dx - dy;
+            
+            let x = x1;
+            let y = y1;
+            
+            while (true) {
+                setPixel(app.frames[app.currentFrame], x, y, app.currentColor);
+                applySymmetry(x, y, app.currentColor);
+                
+                if (x === x2 && y === y2) break;
+                
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y += sy;
+                }
+            }
+        }
+
+        function drawRectangle(x1, y1, x2, y2) {
+            const minX = Math.min(x1, x2);
+            const maxX = Math.max(x1, x2);
+            const minY = Math.min(y1, y2);
+            const maxY = Math.max(y1, y2);
+            
+            for (let x = minX; x <= maxX; x++) {
+                for (let y = minY; y <= maxY; y++) {
+                    if (x === minX || x === maxX || y === minY || y === maxY) {
+                        setPixel(app.frames[app.currentFrame], x, y, app.currentColor);
+                        applySymmetry(x, y, app.currentColor);
+                    }
+                }
+            }
+        }
+
+        // Layer management
+        function addLayer() {
+            const newLayer = {
+                data: app.ctx.createImageData(app.canvasSize, app.canvasSize),
+                visible: true,
+                name: `Layer ${app.layers.length + 1}`
+            };
+            
+            app.layers.push(newLayer);
+            app.currentLayer = app.layers.length - 1;
+            updateLayersPanel();
+        }
+
+        function updateLayersPanel() {
+            const panel = document.getElementById('layersPanel');
+            panel.innerHTML = '';
+            
+            app.layers.forEach((layer, index) => {
+                const item = document.createElement('div');
+                item.className = 'layer-item';
+                if (index === app.currentLayer) item.classList.add('active');
+                
+                item.innerHTML = `
+                    <div class="layer-visibility" onclick="toggleLayerVisibility(${index})">${layer.visible ? '👁️' : '🙈'}</div>
+                    <span>${layer.name}</span>
+                `;
+                
+                item.onclick = (e) => {
+                    if (!e.target.classList.contains('layer-visibility')) {
+                        app.currentLayer = index;
+                        updateLayersPanel();
+                    }
+                };
+                
+                panel.appendChild(item);
+            });
+        }
+
+        function toggleLayerVisibility(index) {
+            app.layers[index].visible = !app.layers[index].visible;
+            updateLayersPanel();
+            updateCanvas();
+        }
+
+        // Initialize the application when the page loads
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
